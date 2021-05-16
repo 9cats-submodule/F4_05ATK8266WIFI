@@ -29,6 +29,7 @@
 #include "lcd.h"
 #include "touch.h"
 #include "24l01.h"
+#include "w25qxx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,7 +60,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
+u8 key;
+#define SIZE sizeof(TEXT_Buffer)
 /* USER CODE END 0 */
 
 /**
@@ -69,10 +72,10 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  u8 key,mode;
-  u16 t=0;
-  u8 tmp_buf[33];
-
+	u16 i=0;
+	u8 datatemp[SIZE];
+	u32 FLASH_SIZE;
+	u16 id = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -98,96 +101,30 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  delay_init(168);
-	LCD_Init();
-	tp_dev.init();
- 	NRF24L01_Init();
+  delay_init(168);     //初始化延时函数
+  LCD_Init();					//LCD初始化
+  W25QXX_Init();			//W25QXX初始化
 
- 	POINT_COLOR=RED;//
-	LCD_ShowString(30,50,200,16,16,"Explorer STM32F4");	
-	LCD_ShowString(30,70,200,16,16,"NRF24L01 TEST");	
-	LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
-	LCD_ShowString(30,110,200,16,16,"2014/5/9");
-	while(NRF24L01_Check())
+  POINT_COLOR=RED;
+  LCD_ShowString(30,50,200,16,16,"Explorer STM32F4");
+  LCD_ShowString(30,70,200,16,16,"SPI TEST");
+  LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
+  LCD_ShowString(30,110,200,16,16,"2014/5/6");
+  LCD_ShowString(30,130,200,16,16,"KEY_UP:Write  KEY0:Read");	//显示提示信息
+	while(1)
 	{
-		LCD_ShowString(30,130,200,16,16,"NRF24L01 Error");
-		delay_ms(200);
-		LCD_Fill(30,130,239,130+16,WHITE);
- 		delay_ms(200);
-	}
-	LCD_ShowString(30,130,200,16,16,"NRF24L01 OK");
- 	while(1)
-	{	
-		key=KEY_Scan(0);
-		if(key==KEY0_PRES)
-		{
-			mode=0;   
+		id = W25QXX_ReadID();
+		if (id == W25Q64)
 			break;
-		}else if(key==KEY1_PRES)
-		{
-			mode=1;
-			break;
-		}
-		t++;
-		if(t==100)LCD_ShowString(10,150,230,16,16,"KEY0:RX_Mode  KEY1:TX_Mode"); //闂?儊鏄剧ず鎻愮ず淇℃伅
- 		if(t==200)
-		{	
-			LCD_Fill(10,150,230,150+16,WHITE);
-			t=0; 
-		}
-		delay_ms(5);	  
-	}   
- 	LCD_Fill(10,150,240,166,WHITE);//娓呯┖涓婇潰鐨勬樉绀?		  
- 	POINT_COLOR=BLUE;//璁剧疆瀛椾綋涓鸿摑鑹?
-   	if(mode==0)//RX妯″紡
-	{
-		LCD_ShowString(30,150,200,16,16,"NRF24L01 RX_Mode");	
-		LCD_ShowString(30,170,200,16,16,"Received DATA:");	
-		NRF24L01_RX_Mode();		  
-		while(1)
-		{	  		    		    				 
-			if(NRF24L01_RxPacket(tmp_buf)==0)//涓?鏃︽帴鏀跺埌淇℃伅,鍒欐樉绀哄嚭鏉?.
-			{
-				tmp_buf[32]=0;//鍔犲叆瀛楃?涓茬粨鏉熺?
-				LCD_ShowString(0,190,lcddev.width-1,32,16,tmp_buf);    
-			}else delay_us(100);	   
-			t++;
-			if(t==10000)//澶х害1s閽熸敼鍙樹竴娆＄姸鎬?
-			{
-				t=0;
-				LED0_T;
-			} 				    
-		};	
-	}else//TX妯″紡
-	{							    
-		LCD_ShowString(30,150,200,16,16,"NRF24L01 TX_Mode");	
-		NRF24L01_TX_Mode();
-		mode=' ';//浠庣┖鏍奸敭寮?濮?  
-		while(1)
-		{	  		   				 
-			if(NRF24L01_TxPacket(tmp_buf)==TX_OK)
-			{
-				LCD_ShowString(30,170,239,32,16,"Sended DATA:");	
-				LCD_ShowString(0,190,lcddev.width-1,32,16,tmp_buf); 
-				key=mode;
-				for(t=0;t<32;t++)
-				{
-					key++;
-					if(key>('~'))key=' ';
-					tmp_buf[t]=key;	
-				}
-				mode++; 
-				if(mode>'~')mode=' ';  	  
-				tmp_buf[32]=0;//鍔犲叆缁撴潫绗?		   
-			}else
-			{										   	
- 				LCD_Fill(0,170,lcddev.width,170+16*3,WHITE);//娓呯┖鏄剧ず			   
-				LCD_ShowString(30,170,lcddev.width-1,32,16,"Send Failed "); 
-			};
-			LED0_T;
-			delay_ms(1500);				    
-		};
+		LCD_ShowString(30,150,200,16,16,"W25Q128 Check Failed!");
+		delay_ms(500);
+		LCD_ShowString(30,150,200,16,16,"Please Check!      ");
+		delay_ms(500);
+		LED0_T;		//DS0闪烁
 	}
+	LCD_ShowString(30,150,200,16,16,"W25Q128 Ready!");
+	FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
+	POINT_COLOR=BLUE;			//设置字体为蓝色
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -197,6 +134,29 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+		key=KEY_Scan(0);
+		if(key==KEY0_PRES)//KEY1按下,写入W25Q128
+		{
+			LCD_Fill(0,170,239,319,WHITE);//清除半屏
+			LCD_ShowString(30,170,200,16,16,"Start Write W25Q128....");
+			W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);		//从倒数第100个地址处开始,写入SIZE长度的数据
+			LCD_ShowString(30,170,200,16,16,"W25Q128 Write Finished!");	//提示传送完成
+		}
+		if(key==KEY1_PRES)//KEY0按下,读取字符串并显示
+		{
+			LCD_ShowString(30,170,200,16,16,"Start Read W25Q128.... ");
+			W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);					//从倒数第100个地址处开始,读出SIZE个字节
+			LCD_ShowString(30,170,200,16,16,"The Data Readed Is:   ");	//提示传送完成
+			LCD_ShowString(30,190,200,16,16,datatemp);					//显示读到的字符串
+		}
+		i++;
+		delay_ms(10);
+		if(i==20)
+		{
+			LED0_T;//提示系统正在运行
+			i=0;
+		}
   }
   /* USER CODE END 3 */
 }
