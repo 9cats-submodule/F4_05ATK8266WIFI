@@ -21,7 +21,7 @@
 #include "spi.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "base.h"
 /* USER CODE END 0 */
 
 SPI_HandleTypeDef hspi1;
