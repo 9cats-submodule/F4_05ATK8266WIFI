@@ -63,9 +63,6 @@ void W25QXX_Erase_Sector(u32 Dst_Addr);	//扇区擦除
 void W25QXX_Wait_Busy(void);           	//等待空闲
 void W25QXX_PowerDown(void);        	//进入掉电模式
 void W25QXX_WAKEUP(void);				//唤醒
-void SPI1_Init(void);
-void SPI1_SetSpeed(u8 SpeedSet);
-u8 SPI1_ReadWriteByte(u8 TxData);
 #endif
 
 
