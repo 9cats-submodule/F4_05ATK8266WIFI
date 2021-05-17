@@ -21,7 +21,11 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "string.h"
 
+u8 USART3_TX_BUF[USART3_MAX_SEND_LEN]; 	//发送缓冲,最大USART3_MAX_SEND_LEN字节
+u8 USART3_RX_BUF[USART3_MAX_RECV_LEN]; 	//接收缓冲,最大USART3_MAX_RECV_LEN个字节.
+u16 USART3_RX_STA=0;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -184,7 +188,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 /* USER CODE BEGIN 1 */
 void u3_printf(u8* fmt)
 {
-	HAL_UART_Transmit(&huart3, fmt, sizeof(fmt), 2000);
+	u8 temp[USART3_MAX_SEND_LEN+2];
+	memset(temp,0,USART3_MAX_SEND_LEN+2);
+	HAL_UART_Transmit(&huart3, temp, strlen(temp), 2000);
 }
 /* USER CODE END 1 */
 

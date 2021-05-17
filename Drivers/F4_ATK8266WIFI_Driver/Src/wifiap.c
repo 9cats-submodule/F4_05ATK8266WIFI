@@ -28,7 +28,7 @@ u8 atk_8266_wifiap_test(void)
 	u8 res=0;
 	u16 rlen=0;
 	u8 constate=0;	//连接状态
-	p=mymalloc(SRAMIN,32);							//申请32字节内存
+	p=malloc(32);							//申请32字节内存
 	
 PRESTA:
 	netpro=atk_8266_netpro_sel(50,30,(u8*)ATK_ESP8266_CWMODE_TBL[1]);	//选择网络模式
@@ -126,7 +126,7 @@ PRESTA:
 						atk_8266_send_cmd("AT+CIPSEND","OK",20);       //开始透传
 						sprintf((char*)p,"ATK-8266%s测试%02d\r\n",ATK_ESP8266_WORKMODE_TBL[netpro],t/10);//测试数据
 						Show_Str(30+54,100,200,12,p,12,0);
-						u3_printf("%s",p);
+						u3_printf(p);
 						timex=100;
 					}
 					else    //TCP Server
@@ -167,10 +167,10 @@ PRESTA:
 		else Show_Str(30+30,80,200,12,"连接失败",12,0); 	  	 
 		t=0;
 	}
-	if((t%20)==0)LED0=!LED0;
+	if((t%20)==0)LED0_T;
 	atk_8266_at_response(1);
 }
-	myfree(SRAMIN,p);		//释放内存 
+	free(p);		//释放内存
 	return res;		
 } 
 

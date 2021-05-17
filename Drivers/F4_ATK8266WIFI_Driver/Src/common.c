@@ -16,7 +16,7 @@
 //用户配置区
 
 //连接端口号:8086,可自行修改为其他端口.
-const u8* portnum="8086";		 
+const u8* portnum="8086";
 
 //WIFI STA模式,设置要去连接的路由器无线参数,请根据你自己的路由器设置,自行修改.
 const u8* wifista_ssid="ALIENTEK";			//路由器SSID号
@@ -73,9 +73,14 @@ u8* atk_8266_check_cmd(u8 *str)
 //       1,发送失败
 u8 atk_8266_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 {
+	u8 temp[USART3_MAX_SEND_LEN+2];
 	u8 res=0; 
 	USART3_RX_STA=0;
-	u3_printf("%s\r\n",cmd);	//发送命令
+
+	memset(temp,0,USART3_MAX_SEND_LEN+2);
+	sprintf((char *)temp,"%s\r\n",cmd);
+	u3_printf(temp);
+
 	if(ack&&waittime)		//需要等待应答
 	{
 		while(--waittime)	//等待倒计时
@@ -93,6 +98,7 @@ u8 atk_8266_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 		}
 		if(waittime==0)res=1; 
 	}
+
 	return res;
 } 
 //向ATK-ESP8266发送指定数据
@@ -104,7 +110,7 @@ u8 atk_8266_send_data(u8 *data,u8 *ack,u16 waittime)
 {
 	u8 res=0; 
 	USART3_RX_STA=0;
-	u3_printf("%s",data);	//发送命令
+	u3_printf(data);	//发送命令
 	if(ack&&waittime)		//需要等待应答
 	{
 		while(--waittime)	//等待倒计时
@@ -260,11 +266,11 @@ void atk_8266_get_ip(u8 x,u8 y)
 		u8 *p2;
 		u8 *ipbuf;
 		u8 *buf;
-		p=mymalloc(SRAMIN,32);							//申请32字节内存
-		p1=mymalloc(SRAMIN,32);							//申请32字节内存
-		p2=mymalloc(SRAMIN,32);							//申请32字节内存
-	  ipbuf=mymalloc(SRAMIN,32);							//申请32字节内存
-		buf=mymalloc(SRAMIN,32);							//申请32字节内存
+		p = malloc(32);
+		p1 = malloc(32);
+		p2 = malloc(32);
+		ipbuf = malloc(32);
+		buf = malloc(32);
 		if(atk_8266_send_cmd("AT+CIFSR","OK",50))//获取WAN IP地址失败
 		{ 
 			*ipbuf=0;
@@ -284,11 +290,11 @@ void atk_8266_get_ip(u8 x,u8 y)
 			ipbuf=p+7;
 			sprintf((char*)buf,"STA IP:%s 端口:%s",ipbuf,(u8*)portnum);
 			Show_Str(x,y+15,200,12,buf,12,0);				//显示STA模式的IP地址和端口
-			myfree(SRAMIN,p);		//释放内存
-			myfree(SRAMIN,p1);		//释放内存
-			myfree(SRAMIN,p2);		//释放内存
-			myfree(SRAMIN,ipbuf);		//释放内存
-			myfree(SRAMIN,buf);		//释放内存
+			free(p);
+			free(p1);
+			free(p2);
+			free(ipbuf);
+			free(buf);
 		}
 }
 
@@ -297,10 +303,12 @@ void atk_8266_get_ip(u8 x,u8 y)
 //wanip:0,全部更新显示;1,仅更新wanip.
 void atk_8266_msg_show(u16 x,u16 y,u8 wanip)
 {
-	u8 *p,*p1,*p2;
-	p=mymalloc(SRAMIN,32);							//申请32字节内存
-	p1=mymalloc(SRAMIN,32);							//申请32字节内存
-	p2=mymalloc(SRAMIN,32);							//申请32字节内存
+	u8 *p;
+	u8 *p1;
+	u8 *p2;
+	p = (u8 *)malloc(32);
+	p1 = (u8 *)malloc(32);
+	p2 = (u8 *)malloc(32);
 	POINT_COLOR=BLUE;
 	atk_8266_send_cmd("AT+CWMODE=2","OK",20);
 	atk_8266_send_cmd("AT+RST","OK",20);
@@ -338,9 +346,9 @@ void atk_8266_msg_show(u16 x,u16 y,u8 wanip)
 		Show_Str(x,y+64,240,16,"通道号:",16,0);Show_Str(x+56,y+64,240,16,p+1,16,0);
 		Show_Str(x,y+80,240,16,"加密方式:",16,0);Show_Str(x+72,y+80,240,16,(u8*)ATK_ESP8266_ECN_TBL[*(p1+1)-'0'],16,0);
 	}
-	myfree(SRAMIN,p);		//释放内存 
-	myfree(SRAMIN,p1);		//释放内存 
-	myfree(SRAMIN,p2);		//释放内存 
+	free(p);
+	free(p1);
+	free(p2);
 }
 //ATK-ESP8266模块WIFI配置参数显示(仅WIFI STA/WIFI AP模式测试时使用)
 //x,y:显示信息的起始坐标.
@@ -365,11 +373,10 @@ void atk_8266_wificonf_show(u16 x,u16 y,u8* rmd,u8* ssid,u8* encryption,u8* pass
 //2,UDP模式
 u8 atk_8266_netpro_sel(u16 x,u16 y,u8* name) 
 {
-	u8 key=0,t=0,*p;
+	u8 key=0,t=0,p[50];
 	u8 netpro=0;
 	LCD_Clear(WHITE);
 	POINT_COLOR=RED;
-	p=mymalloc(SRAMIN,50);//申请50个字节的内存
 	sprintf((char*)p,"%s 工作模式选择",name);
 	Show_Str_Mid(0,y,p,16,240); 				    	 
 	Show_Str(x,y+30,200,16,"KEY0:下一个",16,0); 				    	 
@@ -403,9 +410,8 @@ u8 atk_8266_netpro_sel(u16 x,u16 y,u8* name)
 		} 
 		delay_ms(10);
 		atk_8266_at_response(1);
-		if((t++)==20){t=0;LED0=!LED0;}//LED闪烁
+		if((t++)==20){t=0;LED0_T;}//LED闪烁
 	} 
-	myfree(SRAMIN,p);
 	return netpro;//返回网络模式选择值 
 } 
 
@@ -414,9 +420,8 @@ u8 atk_8266_mode_cofig(u8 netpro)
 {
 	//u8 netpro;
 	u8 ipbuf[16]; 	//IP缓存
-	u8 *p;
+	u8 p[32];
 	u8 key;
-	p=mymalloc(SRAMIN,32);//申请32个字节的内存
 PRESTA:		
 	netpro|=(atk_8266_netpro_sel(50,30,(u8*)ATK_ESP8266_CWMODE_TBL[1]))<<4;	//网络模式选择
 	if(netpro&0X20)
@@ -449,7 +454,6 @@ PRESTA:
 			}				
 	}
 	else;   //服务器模式不用配置
-	myfree(SRAMIN,p);
 	return netpro;
 }
 
@@ -507,7 +511,7 @@ u8 atk_8266_ip_set(u8* title,u8* mode,u8* port,u8* ip)
 		if(timex==20)
 		{
 			timex=0;
-			LED0=!LED0;
+			LED0_T;
 		}
 		delay_ms(10);
 		atk_8266_at_response(1);//WIFI模块发过来的数据,及时上传给电脑
@@ -573,7 +577,7 @@ void atk_8266_test(void)
 			atk_8266_mtest_ui(32,30);
 			timex=0;
 		} 	 
-		if((timex%20)==0)LED0=!LED0;//200ms闪烁 
+		if((timex%20)==0)LED0_T;//200ms闪烁
 		timex++;	 
 	} 
 }

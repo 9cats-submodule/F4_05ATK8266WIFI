@@ -115,11 +115,11 @@ int main(void)
   if (f_mount(fs[0],"0:",1) != FR_OK) 		//挂载SD卡
     Error_Handler();
 
-	Show_Str(30,30,200,16,"ATK-ESP AP+STA模式测试",16,0);
-	HAL_UART_Transmit(&huart1,"233333",6,1000);
-	printf("23333");
+//	Show_Str(30,30,200,16,"ATK-ESP AP+STA模式测试",16,0);
+//	HAL_UART_Transmit(&huart1,"233333",6,1000);
 	key=KEY_Scan(0);  
 
+	atk_8266_test();		//进入ATK_ESP8266测试
   /* USER CODE END 2 */
 
   /* Infinite loop */
