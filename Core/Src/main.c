@@ -76,7 +76,7 @@ u8 key;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	u8 key,fontok=0;
+  u8 key,fontok=0;
   FATFS* fs[2] = {0,0};
   /* USER CODE END 1 */
 
@@ -104,6 +104,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   delay_init(168);     //初始化延时函??
@@ -115,6 +116,8 @@ int main(void)
     Error_Handler();
 
 	Show_Str(30,30,200,16,"ATK-ESP AP+STA模式测试",16,0);
+	HAL_UART_Transmit(&huart1,"233333",6,1000);
+	printf("23333");
 	key=KEY_Scan(0);  
 
   /* USER CODE END 2 */
