@@ -1,8 +1,7 @@
 /**
   ******************************************************************************
-  * @file    usart.h
-  * @brief   This file contains all the function prototypes for
-  *          the usart.c file
+  * @file           : fatfs_platform.h
+  * @brief          : fatfs_platform header file
   ******************************************************************************
   * @attention
   *
@@ -15,38 +14,13 @@
   *                             www.st.com/SLA0044
   *
   ******************************************************************************
-  */
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USART_H__
-#define __USART_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+*/
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-extern UART_HandleTypeDef huart1;
-
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
-
-void MX_USART1_UART_Init(void);
-
-/* USER CODE BEGIN Prototypes */
-
-/* USER CODE END Prototypes */
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __USART_H__ */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+#include "stm32f4xx_hal.h"
+/* Defines ------------------------------------------------------------------*/
+#define SD_PRESENT               ((uint8_t)0x01)  /* also in bsp_driver_sd.h */
+#define SD_NOT_PRESENT           ((uint8_t)0x00)  /* also in bsp_driver_sd.h */
+#define SD_DETECT_PIN         GPIO_PIN_2
+#define SD_DETECT_GPIO_PORT   GPIOE
+/* Prototypes ---------------------------------------------------------------*/
+uint8_t	BSP_PlatformIsDetected(void);

@@ -19,6 +19,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
+#include "fatfs.h"
+#include "sdio.h"
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,6 +33,7 @@
 #include "touch.h"
 #include "24l01.h"
 #include "w25qxx.h"
+#include "text.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,10 +76,8 @@ u8 key;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	u16 i=0;
-	u8 datatemp[SIZE];
-	u32 FLASH_SIZE;
-	u16 id = 0;
+	u8 key,fontok=0;
+  FATFS* fs[2] = {0,0};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -96,35 +98,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_FSMC_Init();
   MX_SPI1_Init();
   MX_USART1_UART_Init();
+  MX_SDIO_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   delay_init(168);     //初始化延时函??
-  LCD_Init();					//LCD初始??
-  W25QXX_Init();			//W25QXX初始??
+  LCD_Init();			//LCD初始??
+  W25QXX_Init();		//W25QXX初始??
+  font_init();
 
-  POINT_COLOR=RED;
-  LCD_ShowString(30,50,200,16,16,(u8 *)"Explorer STM32F4");
-  LCD_ShowString(30,70,200,16,16,(u8 *)"SPI TEST");
-  LCD_ShowString(30,90,200,16,16,(u8 *)"ATOM@ALIENTEK");
-  LCD_ShowString(30,110,200,16,16,(u8 *)"2014/5/6");
-  LCD_ShowString(30,130,200,16,16,(u8 *)"KEY_UP:Write  KEY0:Read");	//显示提示信息
-	while(1)
-	{
-		id = W25QXX_ReadID();
-		if (id == W25Q64)
-			break;
-		LCD_ShowString(30,150,200,16,16,(u8 *)"W25Q128 Check Failed!");
-		delay_ms(500);
-		LCD_ShowString(30,150,200,16,16,(u8 *)"Please Check!      ");
-		delay_ms(500);
-		LED0_T;		//DS0闪烁
-	}
-	LCD_ShowString(30,150,200,16,16,(u8 *)"W25Q128 Ready!");
-	FLASH_SIZE=16*1024*1024;	//FLASH 大小??16字节
-	POINT_COLOR=BLUE;			//设置字体为蓝??
+  if (f_mount(fs[0],"0:",1) != FR_OK) 		//挂载SD卡
+    Error_Handler();
+
+	Show_Str(30,30,200,16,"ATK-ESP AP+STA模式测试",16,0);
+	key=KEY_Scan(0);  
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -134,29 +126,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-		key=KEY_Scan(0);
-		if(key==KEY0_PRES)//KEY1按下,写入W25Q128
-		{
-			LCD_Fill(0,170,239,319,WHITE);//清除半屏
-			LCD_ShowString(30,170,200,16,16,(u8 *)"Start Write W25Q128....");
-			W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);		//从???数??100个地??处开??,写入SIZE长度的数??
-			LCD_ShowString(30,170,200,16,16,(u8 *)"W25Q128 Write Finished!");	//提示传???完??
-		}
-		if(key==KEY1_PRES)//KEY0按下,读取字符串并显示
-		{
-			LCD_ShowString(30,170,200,16,16,(u8 *)"Start Read W25Q128.... ");
-			W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);					//从???数??100个地??处开??,读出SIZE个字??
-			LCD_ShowString(30,170,200,16,16,(u8 *)"The Data Readed Is:   ");	//提示传???完??
-			LCD_ShowString(30,190,200,16,16,datatemp);					//显示读到的字符串
-		}
-		i++;
-		delay_ms(10);
-		if(i==20)
-		{
-			LED0_T;//提示系统正在运行
-			i=0;
-		}
   }
   /* USER CODE END 3 */
 }
@@ -183,9 +152,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLN = 72;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -196,10 +165,10 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
