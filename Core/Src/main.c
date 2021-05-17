@@ -23,6 +23,7 @@
 #include "fatfs.h"
 #include "sdio.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 #include "fsmc.h"
@@ -105,12 +106,17 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
   MX_USART3_UART_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
   delay_init(168);     //初始化延时函??
   LCD_Init();			//LCD初始??
   W25QXX_Init();		//W25QXX初始??
   font_init();
+//  HAL_UART_Receive_IT(&huart3, USART3_RX_BUF, USART3_MAX_RECV_LEN);
+  HAL_TIM_Base_Start_IT(&htim7);//使能定时器3和定时器3更新中断：TIM_IT_UPDATE
+  TIM7->CR1&=~(1<<0);        //关闭定时器7
+  USART3_RX_STA=0;		//清零
 
   if (f_mount(fs[0],"0:",1) != FR_OK) 		//挂载SD卡
     Error_Handler();

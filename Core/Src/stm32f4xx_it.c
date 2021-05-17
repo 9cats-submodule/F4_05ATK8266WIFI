@@ -23,6 +23,8 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"
+#include "base.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +61,8 @@
 extern DMA_HandleTypeDef hdma_sdio_rx;
 extern DMA_HandleTypeDef hdma_sdio_tx;
 extern SD_HandleTypeDef hsd;
+extern TIM_HandleTypeDef htim7;
+extern UART_HandleTypeDef huart3;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -202,6 +206,41 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles USART3 global interrupt.
+  */
+void USART3_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_IRQn 0 */
+  u8 res;
+  /* USER CODE END USART3_IRQn 0 */
+  HAL_UART_IRQHandler(&huart3);
+  /* USER CODE BEGIN USART3_IRQn 1 */
+	if(__HAL_UART_GET_FLAG(&huart3,UART_FLAG_RXNE)!=RESET)//接收到数据
+	{
+//		HAL_UART_Receive(&UART3_Handler,&res,1,1000);
+		res=USART3->DR;
+		if((USART3_RX_STA&(1<<15))==0)//接收完的一批数据,还没有被处理,则不再接收其他数据
+		{
+			if(USART3_RX_STA<USART3_MAX_RECV_LEN)	//还可以接收数据
+			{
+//				__HAL_TIM_SetCounter(&TIM7_Handler,0);
+				TIM7->CNT=0;         				//计数器清空
+				if(USART3_RX_STA==0) 				//使能定时器7的中断
+				{
+//					__HAL_RCC_TIM7_CLK_ENABLE();            //使能TIM7时钟
+					TIM7->CR1|=1<<0;     			//使能定时器7
+				}
+				USART3_RX_BUF[USART3_RX_STA++]=res;	//记录接收到的值
+			}else
+			{
+				USART3_RX_STA|=1<<15;				//强制标记接收完成
+			}
+		}
+	}
+  /* USER CODE END USART3_IRQn 1 */
+}
+
+/**
   * @brief This function handles SDIO global interrupt.
   */
 void SDIO_IRQHandler(void)
@@ -213,6 +252,22 @@ void SDIO_IRQHandler(void)
   /* USER CODE BEGIN SDIO_IRQn 1 */
 
   /* USER CODE END SDIO_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM7 global interrupt.
+  */
+void TIM7_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_IRQn 0 */
+  USART3_RX_STA|=1<<15;	//标记接收完成
+  __HAL_TIM_CLEAR_FLAG(&htim7,TIM_EventSource_Update );       //清除TIM7更新中断标志
+  TIM7->CR1&=~(1<<0);     			//关闭定时器7
+  /* USER CODE END TIM7_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim7);
+  /* USER CODE BEGIN TIM7_IRQn 1 */
+
+  /* USER CODE END TIM7_IRQn 1 */
 }
 
 /**
