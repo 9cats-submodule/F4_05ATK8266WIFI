@@ -101,30 +101,30 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  delay_init(168);     //åˆå§‹åŒ–å»¶æ—¶å‡½æ•°
-  LCD_Init();					//LCDåˆå§‹åŒ–
-  W25QXX_Init();			//W25QXXåˆå§‹åŒ–
+  delay_init(168);     //³õÊ¼»¯ÑÓÊ±º¯??
+  LCD_Init();					//LCD³õÊ¼??
+  W25QXX_Init();			//W25QXX³õÊ¼??
 
   POINT_COLOR=RED;
-  LCD_ShowString(30,50,200,16,16,"Explorer STM32F4");
-  LCD_ShowString(30,70,200,16,16,"SPI TEST");
-  LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
-  LCD_ShowString(30,110,200,16,16,"2014/5/6");
-  LCD_ShowString(30,130,200,16,16,"KEY_UP:Write  KEY0:Read");	//æ˜¾ç¤ºæç¤ºä¿¡æ¯
+  LCD_ShowString(30,50,200,16,16,(u8 *)"Explorer STM32F4");
+  LCD_ShowString(30,70,200,16,16,(u8 *)"SPI TEST");
+  LCD_ShowString(30,90,200,16,16,(u8 *)"ATOM@ALIENTEK");
+  LCD_ShowString(30,110,200,16,16,(u8 *)"2014/5/6");
+  LCD_ShowString(30,130,200,16,16,(u8 *)"KEY_UP:Write  KEY0:Read");	//ÏÔÊ¾ÌáÊ¾ĞÅÏ¢
 	while(1)
 	{
 		id = W25QXX_ReadID();
 		if (id == W25Q64)
 			break;
-		LCD_ShowString(30,150,200,16,16,"W25Q128 Check Failed!");
+		LCD_ShowString(30,150,200,16,16,(u8 *)"W25Q128 Check Failed!");
 		delay_ms(500);
-		LCD_ShowString(30,150,200,16,16,"Please Check!      ");
+		LCD_ShowString(30,150,200,16,16,(u8 *)"Please Check!      ");
 		delay_ms(500);
-		LED0_T;		//DS0é—ªçƒ
+		LED0_T;		//DS0ÉÁË¸
 	}
-	LCD_ShowString(30,150,200,16,16,"W25Q128 Ready!");
-	FLASH_SIZE=16*1024*1024;	//FLASH å¤§å°ä¸º16å­—èŠ‚
-	POINT_COLOR=BLUE;			//è®¾ç½®å­—ä½“ä¸ºè“è‰²
+	LCD_ShowString(30,150,200,16,16,(u8 *)"W25Q128 Ready!");
+	FLASH_SIZE=16*1024*1024;	//FLASH ´óĞ¡??16×Ö½Ú
+	POINT_COLOR=BLUE;			//ÉèÖÃ×ÖÌåÎªÀ¶??
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -136,25 +136,25 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 		key=KEY_Scan(0);
-		if(key==KEY0_PRES)//KEY1æŒ‰ä¸‹,å†™å…¥W25Q128
+		if(key==KEY0_PRES)//KEY1°´ÏÂ,Ğ´ÈëW25Q128
 		{
-			LCD_Fill(0,170,239,319,WHITE);//æ¸…é™¤åŠå±
-			LCD_ShowString(30,170,200,16,16,"Start Write W25Q128....");
-			W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);		//ä»å€’æ•°ç¬¬100ä¸ªåœ°å€å¤„å¼€å§‹,å†™å…¥SIZEé•¿åº¦çš„æ•°æ®
-			LCD_ShowString(30,170,200,16,16,"W25Q128 Write Finished!");	//æç¤ºä¼ é€å®Œæˆ
+			LCD_Fill(0,170,239,319,WHITE);//Çå³ı°ëÆÁ
+			LCD_ShowString(30,170,200,16,16,(u8 *)"Start Write W25Q128....");
+			W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);		//´Ó???Êı??100¸öµØ??´¦¿ª??,Ğ´ÈëSIZE³¤¶ÈµÄÊı??
+			LCD_ShowString(30,170,200,16,16,(u8 *)"W25Q128 Write Finished!");	//ÌáÊ¾´«???Íê??
 		}
-		if(key==KEY1_PRES)//KEY0æŒ‰ä¸‹,è¯»å–å­—ç¬¦ä¸²å¹¶æ˜¾ç¤º
+		if(key==KEY1_PRES)//KEY0°´ÏÂ,¶ÁÈ¡×Ö·û´®²¢ÏÔÊ¾
 		{
-			LCD_ShowString(30,170,200,16,16,"Start Read W25Q128.... ");
-			W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);					//ä»å€’æ•°ç¬¬100ä¸ªåœ°å€å¤„å¼€å§‹,è¯»å‡ºSIZEä¸ªå­—èŠ‚
-			LCD_ShowString(30,170,200,16,16,"The Data Readed Is:   ");	//æç¤ºä¼ é€å®Œæˆ
-			LCD_ShowString(30,190,200,16,16,datatemp);					//æ˜¾ç¤ºè¯»åˆ°çš„å­—ç¬¦ä¸²
+			LCD_ShowString(30,170,200,16,16,(u8 *)"Start Read W25Q128.... ");
+			W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);					//´Ó???Êı??100¸öµØ??´¦¿ª??,¶Á³öSIZE¸ö×Ö??
+			LCD_ShowString(30,170,200,16,16,(u8 *)"The Data Readed Is:   ");	//ÌáÊ¾´«???Íê??
+			LCD_ShowString(30,190,200,16,16,datatemp);					//ÏÔÊ¾¶Áµ½µÄ×Ö·û´®
 		}
 		i++;
 		delay_ms(10);
 		if(i==20)
 		{
-			LED0_T;//æç¤ºç³»ç»Ÿæ­£åœ¨è¿è¡Œ
+			LED0_T;//ÌáÊ¾ÏµÍ³ÕıÔÚÔËĞĞ
 			i=0;
 		}
   }

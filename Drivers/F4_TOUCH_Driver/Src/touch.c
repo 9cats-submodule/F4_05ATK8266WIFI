@@ -27,14 +27,17 @@ _m_tp_dev tp_dev =
 		TP_Init,
 		TP_Scan,
 		TP_Adjust,
+		{0,
 		0,
 		0,
 		0,
+		0},
+		{0,
 		0,
 		0,
 		0,
-		0,
-		0,
+		0},
+		0
 };
 //默认为touchtype=0的数据.
 u8 CMD_RDX = 0XD0;
@@ -284,21 +287,21 @@ u8 TP_Get_Adjdata(void)
 	return 0;
 }
 //提示字符串
-u8 *const TP_REMIND_MSG_TBL = "Please use the stylus click the cross on the screen.The cross will always move until the screen adjustment is completed.";
+u8 *const TP_REMIND_MSG_TBL = (u8 *)"Please use the stylus click the cross on the screen.The cross will always move until the screen adjustment is completed.";
 
 //提示校准结果(各个参数)
 void TP_Adj_Info_Show(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2, u16 x3, u16 y3, u16 fac)
 {
 	POINT_COLOR = RED;
-	LCD_ShowString(40, 160, lcddev.width, lcddev.height, 16, "x1:");
-	LCD_ShowString(40 + 80, 160, lcddev.width, lcddev.height, 16, "y1:");
-	LCD_ShowString(40, 180, lcddev.width, lcddev.height, 16, "x2:");
-	LCD_ShowString(40 + 80, 180, lcddev.width, lcddev.height, 16, "y2:");
-	LCD_ShowString(40, 200, lcddev.width, lcddev.height, 16, "x3:");
-	LCD_ShowString(40 + 80, 200, lcddev.width, lcddev.height, 16, "y3:");
-	LCD_ShowString(40, 220, lcddev.width, lcddev.height, 16, "x4:");
-	LCD_ShowString(40 + 80, 220, lcddev.width, lcddev.height, 16, "y4:");
-	LCD_ShowString(40, 240, lcddev.width, lcddev.height, 16, "fac is:");
+	LCD_ShowString(40, 160, lcddev.width, lcddev.height, 16, (u8 *)"x1:");
+	LCD_ShowString(40 + 80, 160, lcddev.width, lcddev.height, 16, (u8 *)"y1:");
+	LCD_ShowString(40, 180, lcddev.width, lcddev.height, 16, (u8 *)"x2:");
+	LCD_ShowString(40 + 80, 180, lcddev.width, lcddev.height, 16, (u8 *)"y2:");
+	LCD_ShowString(40, 200, lcddev.width, lcddev.height, 16, (u8 *)"x3:");
+	LCD_ShowString(40 + 80, 200, lcddev.width, lcddev.height, 16, (u8 *)"y3:");
+	LCD_ShowString(40, 220, lcddev.width, lcddev.height, 16, (u8 *)"x4:");
+	LCD_ShowString(40 + 80, 220, lcddev.width, lcddev.height, 16, (u8 *)"y4:");
+	LCD_ShowString(40, 240, lcddev.width, lcddev.height, 16, (u8 *)"fac is:");
 	LCD_ShowNum(40 + 24, 160, x0, 4, 16);	   //显示数值
 	LCD_ShowNum(40 + 24 + 80, 160, y0, 4, 16); //显示数值
 	LCD_ShowNum(40 + 24, 180, x1, 4, 16);	   //显示数值
@@ -431,7 +434,7 @@ void TP_Adjust(void)
 					cnt = 0;
 					TP_Drow_Touch_Point(lcddev.width - 20, lcddev.height - 20, WHITE); //清除点4
 					TP_Drow_Touch_Point(20, 20, RED);								   //画点1
-					LCD_ShowString(40, 26, lcddev.width, lcddev.height, 16, "TP Need readjust!");
+					LCD_ShowString(40, 26, lcddev.width, lcddev.height, 16, (u8 *)"TP Need readjust!");
 					tp_dev.touchtype = !tp_dev.touchtype; //修改触屏类型.
 					if (tp_dev.touchtype)				  //X,Y方向与屏幕相反
 					{
@@ -447,7 +450,7 @@ void TP_Adjust(void)
 				}
 				POINT_COLOR = BLUE;
 				LCD_Clear(WHITE);																	 //清屏
-				LCD_ShowString(35, 110, lcddev.width, lcddev.height, 16, "Touch Screen Adjust OK!"); //校正完成
+				LCD_ShowString(35, 110, lcddev.width, lcddev.height, 16, (u8 *)"Touch Screen Adjust OK!"); //校正完成
 				delay_ms(1000);
 				TP_Save_Adjdata();
 				LCD_Clear(WHITE); //清屏

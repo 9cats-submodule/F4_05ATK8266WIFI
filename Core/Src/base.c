@@ -1,11 +1,11 @@
-// base.câ½‚ä»¶
+// base.c?¼ş
 #include "base.h"
-static u8 fac_us = 0; //uså»¶æ—¶å€ä¹˜æ•°
-//åˆå§‹åŒ–å»¶è¿Ÿå‡½æ•°
-//SYSTICKçš„æ—¶é’Ÿå›ºå®šä¸ºHCLKæ—¶é’Ÿçš„1/8
-//SYSCLK:ç³»ç»Ÿæ—¶é’Ÿ
+static u8 fac_us = 0; //usÑÓÊ±±¶³ËÊı
+//³õÊ¼»¯ÑÓ³Ùº¯Êı
+//SYSTICKµÄÊ±ÖÓ¹Ì¶¨ÎªHCLKÊ±ÖÓµÄ1/8
+//SYSCLK:ÏµÍ³Ê±ÖÓ
 void delay_init(u8 SYSCLK) {
-	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK); //SysTické¢‘ç‡ä¸ºHCLK
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK); //SysTickÆµÂÊÎªHCLK
 	fac_us = SYSCLK;
 }
 void delay_ns(u8 t) {
@@ -16,45 +16,47 @@ void delay_ns(u8 t) {
 void delay_us(u32 nus) {
 	u32 ticks;
 	u32 told, tnow, tcnt = 0;
-	u32 reload = SysTick->LOAD; //LOADçš„å€¼
-	ticks = nus * fac_us;       //éœ€è¦çš„èŠ‚æ‹æ•°
-	told = SysTick->VAL;        //åˆšè¿›â¼Šæ—¶çš„è®¡æ•°å™¨å€¼
+	u32 reload = SysTick->LOAD; //LOADµÄÖµ
+	ticks = nus * fac_us;       //ĞèÒªµÄ½ÚÅÄÊı
+	told = SysTick->VAL;        //¸Õ½ø?Ê±µÄ¼ÆÊıÆ÷Öµ
 	while (1) {
 		tnow = SysTick->VAL;
 		if (tnow != told) {
 			if (tnow < told)
-				tcnt += told - tnow; //è¿™â¾¥æ³¨æ„â¼€ä¸‹SYSTICKæ˜¯â¼€ä¸ªé€’å‡çš„è®¡æ•°å™¨å°±å¯ä»¥äº†.
+				tcnt += told - tnow; //Õâ?×¢Òâ?ÏÂSYSTICKÊÇ?¸öµİ¼õµÄ¼ÆÊıÆ÷¾Í¿ÉÒÔÁË.
 			else
 				tcnt += reload - tnow + told;
 			told = tnow;
 			if (tcnt >= ticks)
-				break; //æ—¶é—´è¶…è¿‡/ç­‰äºè¦å»¶è¿Ÿçš„æ—¶é—´,åˆ™é€€å‡º.
+				break; //Ê±¼ä³¬¹ı/µÈÓÚÒªÑÓ³ÙµÄÊ±¼ä,ÔòÍË³ö.
 		}
 	};
 }
-//å»¶æ—¶nms
-//nms:è¦å»¶æ—¶çš„msæ•°
+//ÑÓÊ±nms
+//nms:ÒªÑÓÊ±µÄmsÊı
 void delay_ms(u16 nms) {
 	u32 i;
 	for (i = 0; i < nms; i++)
 		delay_us(1000);
 }
-//æŒ‰é”®æ‰«æå‡½æ•°
-//ä¸ä½¿ç”¨æ—¶æ³¨é‡Š
+//°´¼üÉ¨Ãèº¯Êı
+//²»Ê¹ÓÃÊ±×¢ÊÍ
 u8 KEY_Scan(u8 mode) {
-	static u8 key_up = 1; //æŒ‰é”®æŒ‰æ¾å¼€æ ‡å¿—
+	static u8 key_up = 1; //°´¼ü°´ËÉ¿ª±êÖ¾
 	if (mode)
-		key_up = 1; //æŒè¿æŒ‰
+		key_up = 1; //³ÖÁ¬°´
 	if (key_up && (KEY0 == 0 || KEY1 == 0 || KEY2 == 0)) {
-		HAL_Delay(10); //å»æŠ–åŠ¨
+		HAL_Delay(10); //È¥¶¶¶¯
 		key_up = 0;
-		if (KEY0 == 0)
+		if (KEYUP == 1)
+			return KEYUP_PRES;
+		else if (KEY0 == 0)
 			return KEY0_PRES;
 		else if (KEY1 == 0)
 			return KEY1_PRES;
 		else if (KEY2 == 0)
 			return KEY2_PRES;
-	} else if (KEY0 == 1 && KEY1 == 1 && KEY2 == 1)
+	} else if (KEY0 == 1 && KEY1 == 1 && KEY2 == 1 && KEYUP == 0)
 		key_up = 1;
-	return 0; // æŒ‰é”®æŒ‰ä¸‹
+	return 0; // °´¼ü°´ÏÂ
 }
