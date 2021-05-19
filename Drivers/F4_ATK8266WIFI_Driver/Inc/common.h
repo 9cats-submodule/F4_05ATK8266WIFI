@@ -5,7 +5,7 @@
 #include "lcd.h"   
 #include "w25qxx.h" 	 
 #include "touch.h" 	 
-#include "malloc.h"
+#include <stdlib.h>
 #include "string.h"    
 #include "text.h"
 #include "ff.h"
